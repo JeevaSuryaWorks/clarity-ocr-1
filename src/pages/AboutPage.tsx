@@ -59,7 +59,7 @@ const AboutPage = () => {
             <div className="flex-1 space-y-6">
               <h2 className="text-3xl font-bold font-sora">Our Story</h2>
               <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                Started as a final year project at K.S.Rangasamy College of Technology, Clarity OCR was born from a simple frustration: why represents document data extraction is so hard?
+                Started as a final year project at Massachusetts Institute of Technology, Clarity OCR was born from a simple frustration: why represents document data extraction is so hard?
               </p>
               <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
                 What began as a simple text extraction tool has evolved into a comprehensive platform handling thousands of documents, powered by advanced machine learning models.

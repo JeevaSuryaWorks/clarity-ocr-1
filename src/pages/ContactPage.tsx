@@ -110,8 +110,10 @@ const ContactPage = () => {
                                     <div>
                                         <p className="font-medium">Office</p>
                                         <p className="text-slate-500 dark:text-slate-400">
-                                            K.S.Rangasamy College of Technology<br />
-                                            Tiruchengode, Tamil Nadu, India
+                                            Massachusetts Institute of Technology<br />
+                                            77 Massachusetts Avenue
+                                            Cambridge, MA 02139
+                                            United States
                                         </p>
                                     </div>
                                 </div>

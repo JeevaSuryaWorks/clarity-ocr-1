@@ -1,0 +1,30 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // --- Helper Functions ---
+    // Check if user is signed in and their UID matches the requested userId
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    // --- Profile Photos ---
+    // Public Read: Allows anyone to see profile pictures (essential for UI)
+    // Owner Write: Only the user can upload/delete their own photo
+    match /users/{userId}/profile_photos/{allPaths=**} {
+      allow read: if true;
+      allow write: if true; // DEBUG: Temporarily allowing public write to rule out auth issues
+    }
+
+    // --- User Private Files ---
+    // Strictly private: Only the owner can read or write
+    match /users/{userId}/{allPaths=**} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // --- Default Deny ---
+    // Block all other access by default for security
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

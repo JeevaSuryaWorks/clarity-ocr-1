@@ -1,0 +1,170 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // =========================================================
+    // Helper Functions
+    // =========================================================
+    
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    // Check if the user is the 'uploaderId' of the generic document
+    function isResourceOwner() {
+      return isSignedIn() && (
+        (resource == null && request.resource.data.uploaderId == request.auth.uid) ||
+        (resource != null && resource.data.uploaderId == request.auth.uid)
+      );
+    }
+
+    // =========================================================
+    // Collection Rules
+    // =========================================================
+
+    // 1. User Data & User History
+    // Strictly restrict access to the user themselves
+    match /users/{userId} {
+      allow read, write: if isSignedIn() && isOwner(userId);
+      
+      // Allow access to subcollections (like history, settings)
+      match /{document=**} {
+        allow read, write: if isSignedIn() && isOwner(userId);
+      }
+    }
+    
+    // 2. Generic Documents (Root Level)
+    // Used for PDF uploads etc.
+    match /documents/{document=**} {
+      allow read, write: if isResourceOwner();
+    }
+
+    // 3. Activity Logs (Audit Trail)
+    match /activity_logs/{logId} {
+      // Anyone signed in can create a log
+      allow create: if isSignedIn();
+      // Users can only read their own logs
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+       // Users can delete their own logs (optional, for cleanup)
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+    
+    // 4. Contact Messages (Public)
+    match /contact_messages/{messageId} {
+      // Allow anyone to create a message (Public Form)
+      allow create: if true;
+      // Only admins should read (requires custom claim or separate admin app), 
+      // but for now we restrict read to no one (backend/admin SDK only)
+      allow read, update, delete: if false; 
+    }
+
+    // 5. Stripe Customers (Billing)
+    // Managed by Firebase Extension usually, but users need to read their status
+    match /customers/{uid} {
+      allow read: if request.auth.uid == uid;
+
+      match /checkout_sessions/{id} {
+        allow read, write: if request.auth.uid == uid;
+      }
+      match /subscriptions/{id} {
+        allow read: if request.auth.uid == uid;
+      }
+      match /payments/{id} {
+        allow read: if request.auth.uid == uid;
+      }
+    }
+
+    // 6. Stripe Products & Prices (Public Read)
+    match /products/{id} {
+      allow read: if true;
+
+      match /prices/{id} {
+        allow read: if true;
+      }
+      match /tax_rates/{id} {
+        allow read: if true;
+      }
+    }
+
+    // 7. Public Checklists (Sharing System)
+    match /publicChecklists/{shareId} {
+      
+      // --- Sharing Helpers ---
+      
+      function isChecklistOwner() {
+        return request.auth != null && resource.data.ownerUid == request.auth.uid;
+      }
+
+      function isPublic() {
+        return resource.data.permissions.public.enabled == true;
+      }
+
+      function isInvited() {
+        return request.auth != null && 
+               resource.data.permissions.users != null &&
+               request.auth.token.email in resource.data.permissions.users;
+      }
+
+      function getPublicRole() {
+        return resource.data.permissions.public.role;
+      }
+
+      function getUserRole() {
+        return resource.data.permissions.users[request.auth.token.email].role;
+      }
+
+      function hasRole(role) {
+        return (isPublic() && getPublicRole() == role) ||
+               (isInvited() && getUserRole() == role);
+      }
+
+      function isEditor() {
+        return hasRole('editor');
+      }
+
+      // --- Rules ---
+
+      // READ: 
+      // - Owner can always read.
+      // - Anyone can read if it's Public.
+      // - Invited users (via email) can read.
+      // - Allow reading (checking existence) if resource is null (document doesn't exist yet)
+      allow read: if resource == null || isChecklistOwner() || isPublic() || isInvited();
+
+      // CREATE: 
+      // - Any authenticated user can create a share document involved in their own data.
+      allow create: if request.auth != null && request.resource.data.ownerUid == request.auth.uid;
+
+      // UPDATE:
+      // 1. Owner: Can update entire document.
+      // 2. Viewers/Anyone (Read Access): Can ONLY update 'viewCount'.
+      // 3. Editors: Can update 'title', 'analysisResult', 'updatedAt', and 'viewCount'.
+      //    Editors CANNOT change permissions or ownerUid.
+      allow update: if 
+        isChecklistOwner() || 
+        (
+          // View Count Increment (allowed for anyone with read access)
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount']) && 
+          (isPublic() || isInvited())
+        ) ||
+        (
+          // Editor Logic
+          isEditor() && 
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['title', 'analysisResult', 'updatedAt', 'viewCount'])
+        );
+
+      // DELETE:
+      // - Only the owner can delete the shared document.
+      allow delete: if isChecklistOwner();
+    }
+    
+    // 8. Public Team Settings (Collect Cash Page)
+    match /settings/team_payment_status {
+      allow read, write: if true;
+    }
+  }
+}

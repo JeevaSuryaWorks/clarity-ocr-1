@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- =============================================================== -->
+    <!-- CORE METADATA                                                   -->
+    <!-- =============================================================== -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Clarity OCR | AI Document Analysis</title>
+    <meta name="description" content="Intelligently reads your documents, identifies tasks, and creates organized checklists, saving you hours of manual work." />
+    <meta name="author" content="Lovable" />
+
+    <!-- =============================================================== -->
+    <!-- PWA, FAVICONS, AND MOBILE THEMING                               -->
+    <!-- =============================================================== -->
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Dynamic Theme Color for Browser UI (Adapts to Light/Dark Mode) -->
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F9FAFB" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0D1121" />
+
+    <!-- Advanced SVG Favicon (Adapts to Light/Dark Mode) -->
+    <link rel="icon" href="/favicon.ico" type="image/svg+xml" />
+    
+    <!-- Fallback Favicon for older browsers -->
+    <link rel="alternate icon" href="/favicon.ico" sizes="any" />
+
+    <!-- iOS "Add to Home Screen" Icon -->
+    <link rel="apple-touch-icon" href="/logo.png" />
+    
+    <!-- iOS PWA Fullscreen Experience -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Clarity OCR" />
+
+    <!-- 
+      iOS Splash Screens (Startup Images) 
+      ACTION REQUIRED: Create these images for a native-like launch experience.
+      You can use online generators to create the various sizes.
+    -->
+    <!-- iPhone 14 Pro Max -->
+    <link rel="apple-touch-startup-image" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)" href="/splash/iphone14_pro_max.png" />
+    <!-- iPhone 14 -->
+    <link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)" href="/splash/iphone14.png" />
+    <!-- iPad Pro 12.9" -->
+    <link rel="apple-touch-startup-image" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)" href="/splash/ipad_pro_12.9.png" />
+
+
+    <!-- =============================================================== -->
+    <!-- SEO & SOCIAL SHARING (OPEN GRAPH / TWITTER CARDS)               -->
+    <!-- =============================================================== -->
+    <!-- ACTION REQUIRED: Replace "https://your-app-url.com" with your production URL -->
+    <link rel="canonical" href="https://your-app-url.com" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Open Graph (for Facebook, LinkedIn, etc.) -->
+    <meta property="og:title" content="Clarity OCR: Transform Documents into Action" />
+    <meta property="og:description" content="Intelligently reads your documents, identifies tasks, and creates organized checklists with AI." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://your-app-url.com" />
+    <meta property="og:image" content="https://your-app-url.com/logoback.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <!-- ACTION REQUIRED: Replace with your actual Twitter handle -->
+    <meta name="twitter:site" content="@lovable_dev" />
+    <meta name="twitter:title" content="Clarity OCR: Transform Documents into Action" />
+    <meta name="twitter:description" content="Intelligently reads your documents, identifies tasks, and creates organized checklists with AI." />
+    <meta name="twitter:image" content="https://your-app-url.com/logoback.png" />
+
+
+    <!-- =============================================================== -->
+    <!-- PERFORMANCE HINTS                                               -->
+    <!-- =============================================================== -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Preconnect to Firebase if you use it -->
+    <link rel="preconnect" href="https://www.googleapis.com" />
+    
+    <!-- Preload the main script module for faster execution -->
+    <link rel="modulepreload" href="/src/main.tsx" />
+  </head>
+
+  <body>
+    <!-- Root element for your app -->
+    <div id="root">
+        <!-- 
+          Fallback content for users with JavaScript disabled.
+          This will be replaced by your React app.
+        -->
+        <noscript>
+          <div style="background-color: #0D1121; color: #F9FAFB; font-family: sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem;">
+            <h1 style="font-size: 2rem; margin-bottom: 1rem;">JavaScript is Required</h1>
+            <p style="font-size: 1.2rem; max-width: 600px;">This application is built with modern web technologies and requires JavaScript to function. Please enable JavaScript in your browser settings and refresh the page.</p>
+          </div>
+        </noscript>
+    </div>
+
+    <!-- The main script for your application -->
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -36,7 +36,7 @@ export default defineConfig(({ mode }) => {
     optimizeDeps: {
       // ⬇️ Pre-bundles PDF.js to prevent "require is not defined" errors
       // include: ["pdfjs-dist"], 
-      exclude: ["pdfjs-dist", "lucide-react"], // Exclude icons from optimization to allow tree-shaking
+      exclude: ["pdfjs-dist"], // Exclude PDF.js to handle worker separately
     },
     build: {
       outDir: "dist",

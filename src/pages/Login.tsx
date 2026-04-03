@@ -199,9 +199,12 @@ export default function Login() {
     <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-[#020817] text-slate-900 dark:text-slate-50 font-sans p-4 relative overflow-hidden">
 
       {/* --- Global Background Effects --- */}
-      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
-        <div className="absolute top-[-20%] left-[-20%] w-[80vw] h-[80vw] bg-sky-500/10 rounded-full blur-[120px] mix-blend-multiply dark:mix-blend-screen animate-blob" />
-        <div className="absolute bottom-[-20%] right-[-20%] w-[80vw] h-[80vw] bg-indigo-500/10 rounded-full blur-[120px] mix-blend-multiply dark:mix-blend-screen animate-blob animation-delay-2000" />
+      <div className="fixed inset-0 -z-10 overflow-hidden bg-slate-50 dark:bg-[#020817]">
+        <div className="absolute inset-0 z-0 pointer-events-auto">
+          <iframe src="https://my.spline.design/6Wq1Q7YGyMsq293S/" className="w-full h-full border-0" title="3D Background"></iframe>
+        </div>
+        <div className="absolute top-[-20%] left-[-20%] w-[80vw] h-[80vw] bg-sky-500/10 rounded-full blur-[120px] mix-blend-multiply dark:mix-blend-screen animate-blob pointer-events-none" />
+        <div className="absolute bottom-[-20%] right-[-20%] w-[80vw] h-[80vw] bg-indigo-500/10 rounded-full blur-[120px] mix-blend-multiply dark:mix-blend-screen animate-blob animation-delay-2000 pointer-events-none" />
       </div>
 
       <div className="w-full max-w-md relative z-10">
@@ -321,11 +324,7 @@ export default function Login() {
           </Card>
         </motion.div>
 
-        <div className="mt-8 text-center">
-          <Link to="/" className="inline-flex items-center text-sm text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">
-            <ArrowLeft className="w-4 h-4 mr-1" /> Back to Home
-          </Link>
-        </div>
+
 
       </div>
     </div>

@@ -1,8 +1,5 @@
 // src/pages/Features.tsx
-import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Eye, Target, Clock, Zap, FileText, User, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -47,7 +44,7 @@ const FEATURES_DATA = [
 
 function FeaturesPage() {
   const navigate = useNavigate();
-  
+
   const handleBack = () => {
     navigate('/');
   };
@@ -59,8 +56,8 @@ function FeaturesPage() {
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 size="sm"
                 onClick={handleBack}
                 className="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400"
@@ -119,7 +116,7 @@ function FeaturesPage() {
           ))}
         </div>
       </div>
-      
+
       <style>{`
         .gradient-primary {
           background: linear-gradient(135deg, #4f46e5, #7c3aed);

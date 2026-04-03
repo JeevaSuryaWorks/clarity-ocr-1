@@ -18,11 +18,18 @@ const firebaseConfig = {
 // Initialize Firebase (Prevent duplicate initialization during HMR)
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-// Initialize Services
-export const analytics = getAnalytics(app);
+// Initialize Services with resilience
 export const auth = getAuth(app);
 export const db = getFirestore(app);
-
 export const googleProvider = new GoogleAuthProvider();
 
+// Analytics can fail due to blockers - wrapping to prevent app crash
+let analyticsInstance = null;
+try {
+  analyticsInstance = getAnalytics(app);
+} catch (e) {
+  console.warn("Analytics blocked or failed to initialize:", e);
+}
+
+export const analytics = analyticsInstance;
 export default app;

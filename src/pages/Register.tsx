@@ -192,9 +192,12 @@ export default function Register() {
     <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-[#020817] text-slate-900 dark:text-slate-50 font-sans p-4 relative overflow-hidden">
 
       {/* Background Decor */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-500/10 rounded-full blur-[100px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-sky-500/10 rounded-full blur-[100px]" />
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 bg-slate-50 dark:bg-[#020817]">
+        <div className="absolute inset-0 z-0 pointer-events-auto">
+          <iframe src="https://my.spline.design/6Wq1Q7YGyMsq293S/" className="w-full h-full border-0" title="3D Background"></iframe>
+        </div>
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-sky-500/10 rounded-full blur-[100px] pointer-events-none" />
       </div>
 
       <div className="w-full max-w-md relative z-10">
@@ -337,11 +340,7 @@ export default function Register() {
           </Card>
         </motion.div>
 
-        <div className="mt-8 text-center">
-          <Link to="/" className="inline-flex items-center text-sm text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">
-            <ArrowLeft className="w-4 h-4 mr-1" /> Back to Home
-          </Link>
-        </div>
+
 
       </div>
     </div>

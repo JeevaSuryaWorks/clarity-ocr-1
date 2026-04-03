@@ -26,11 +26,13 @@ interface AuthContextType {
   completeOnboarding: () => Promise<void>;
   acceptTerms: () => Promise<void>;
   logout: () => Promise<void>;
+  simulateUserUpgrade?: (role: 'pro' | 'business') => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  console.log("[AuthContext] AuthProvider rendering. Loading state:", true);
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -102,15 +104,37 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   // 2. Listen for Auth State Changes (Main flow)
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        await syncUserWithFirestore(firebaseUser);
-      } else {
-        setUser(null);
+    // Safety timeout: If Firebase takes >8s to respond, force load completion
+    const timeoutId = setTimeout(() => {
+      if (loading) {
+        console.warn("[AuthContext] Auth listener timeout - forcing render");
+        setLoading(false);
       }
+    }, 8000);
+
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      try {
+        if (firebaseUser) {
+          await syncUserWithFirestore(firebaseUser);
+        } else {
+          setUser(null);
+        }
+      } catch (err) {
+        console.error("[AuthContext] Auth change error:", err);
+      } finally {
+        setLoading(false);
+        clearTimeout(timeoutId);
+      }
+    }, (error) => {
+      console.error("[AuthContext] Auth state subscription failed:", error);
       setLoading(false);
+      clearTimeout(timeoutId);
     });
-    return unsubscribe;
+
+    return () => {
+      unsubscribe();
+      clearTimeout(timeoutId);
+    };
   }, [syncUserWithFirestore]);
 
   const refreshUser = useCallback(async () => {
@@ -166,6 +190,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  const simulateUserUpgrade = (role: 'pro' | 'business') => {
+    if (user) {
+      setUser({ ...user, stripeRole: role });
+    }
+  };
+
   const value = useMemo(() => ({
     user,
     loading,
@@ -173,12 +203,26 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     loginWithGoogle,
     completeOnboarding,
     acceptTerms,
-    logout
+    logout,
+    simulateUserUpgrade
   }), [user, loading, refreshUser]);
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {loading ? (
+        <div className="h-screen w-full flex flex-col items-center justify-center bg-slate-50 dark:bg-[#0B0F19] transition-colors duration-500 text-slate-900 dark:text-white">
+          <div className="relative">
+            <div className="absolute inset-0 bg-sky-500/20 blur-2xl rounded-full animate-pulse" />
+            <svg className="animate-spin h-12 w-12 text-sky-500 relative z-10" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+          <p className="mt-4 font-medium animate-pulse">Initializing Clarity...</p>
+        </div>
+      ) : (
+        children
+      )}
     </AuthContext.Provider>
   );
 };

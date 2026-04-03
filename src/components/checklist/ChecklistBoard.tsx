@@ -118,7 +118,31 @@ export const ChecklistBoard: React.FC<ChecklistBoardProps> = ({
     const handleUpdateTaskPriority = (groupId: string, taskId: string, priority: any) => {
         if (isReadOnly) return;
         if (onUpdateTask) { onUpdateTask(groupId, taskId, { priority }); return; }
-        // Legacy update... skipping for brevity as it's not strictly requested but good to have consistency if I could.
+        
+        updateHistoryItem(p => {
+            const newGroups = p.analysisResult.groups.map(g => g.id === groupId ? { ...g, tasks: g.tasks.map(t => t.id === taskId ? { ...t, priority } : t) } : g);
+            return { ...p, analysisResult: { ...p.analysisResult, groups: newGroups } };
+        });
+    };
+
+    const handleRenameGroupLocal = (groupId: string, name: string) => {
+        if (isReadOnly) return;
+        if (onRenameGroup) { onRenameGroup(groupId, name); return; }
+
+        updateHistoryItem(p => {
+            const newGroups = p.analysisResult.groups.map(g => g.id === groupId ? { ...g, name } : g);
+            return { ...p, analysisResult: { ...p.analysisResult, groups: newGroups } };
+        });
+    };
+
+    const handleDeleteGroupLocal = (groupId: string) => {
+        if (isReadOnly) return;
+        if (onDeleteGroup) { onDeleteGroup(groupId); return; }
+
+        updateHistoryItem(p => {
+            const newGroups = p.analysisResult.groups.filter(g => g.id !== groupId);
+            return { ...p, analysisResult: { ...p.analysisResult, groups: newGroups } };
+        });
     };
 
     return (
@@ -155,10 +179,10 @@ export const ChecklistBoard: React.FC<ChecklistBoardProps> = ({
                                         </div>
                                         <div className="flex-1 text-left flex items-center justify-between mr-4">
                                             <div className="flex-1" onClick={e => e.stopPropagation()}>
-                                                {onRenameGroup && !isReadOnly ? (
+                                                {!isReadOnly ? (
                                                     <EditableField
                                                         value={group.name}
-                                                        onSave={(val) => onRenameGroup(group.id, val)}
+                                                        onSave={(val) => handleRenameGroupLocal(group.id, val)}
                                                         className="font-semibold text-slate-800 dark:text-slate-100 text-lg"
                                                         onClick={(e: React.MouseEvent) => e.stopPropagation()}
                                                     />
@@ -167,13 +191,13 @@ export const ChecklistBoard: React.FC<ChecklistBoardProps> = ({
                                                         <h3 className="font-semibold text-slate-800 dark:text-slate-100 text-lg">{group.name}</h3>
                                                     </>
                                                 )}
-                                                {(!onRenameGroup || isReadOnly) && <p className="text-xs text-slate-500 dark:text-slate-400">{group.tasks.length} tasks • {group.tasks.filter(t => t.completed).length} done</p>}
+                                                <p className="text-xs text-slate-500 dark:text-slate-400">{group.tasks.length} tasks • {group.tasks.filter(t => t.completed).length} done</p>
                                             </div>
 
-                                            {!isReadOnly && onDeleteGroup && (
+                                            {!isReadOnly && (
                                                 <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-red-500" onClick={(e) => {
                                                     e.stopPropagation();
-                                                    if (confirm('Delete this group and all its tasks?')) onDeleteGroup(group.id);
+                                                    if (confirm('Delete this group and all its tasks?')) handleDeleteGroupLocal(group.id);
                                                 }}>
                                                     <Trash2 className="w-4 h-4" />
                                                 </Button>

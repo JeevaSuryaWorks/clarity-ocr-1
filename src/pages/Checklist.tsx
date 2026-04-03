@@ -146,7 +146,13 @@ const Header: React.FC<{
           placeholder="Document Title"
         />
         <p className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-2">
-          src: {historyItem.fileName} <span className="w-1 h-1 rounded-full bg-slate-300" /> {new Date(historyItem.createdAt).toLocaleDateString()}
+          src: {historyItem.fileName} <span className="w-1 h-1 rounded-full bg-slate-300" /> {
+            historyItem.createdAt?.toDate 
+              ? historyItem.createdAt.toDate().toLocaleDateString() 
+              : historyItem.createdAt?.seconds 
+                ? new Date(historyItem.createdAt.seconds * 1000).toLocaleDateString()
+                : new Date(historyItem.createdAt || Date.now()).toLocaleDateString()
+          }
         </p>
       </div>
     </div>
@@ -160,7 +166,7 @@ const Dashboard: React.FC<{ historyItem: HistoryItem }> = ({ historyItem }) => {
     const allTasks = historyItem.analysisResult.groups.flatMap(g => g.tasks);
     const completed = allTasks.filter(t => t.completed).length;
     const total = allTasks.length;
-    const totalTime = allTasks.reduce((sum, task) => sum + (task.estimatedTime || 0), 0);
+    const totalTime = allTasks.reduce((sum, task) => sum + (task.estimatedTime || (task.priority === 'critical' ? 120 : task.priority === 'high' ? 60 : 30)), 0);
     return {
       completion: total > 0 ? (completed / total) * 100 : 0,
       completed,
@@ -257,7 +263,7 @@ const SummarySection: React.FC<{
         >
           <EditableField
             isTextarea
-            value={summary.projectDescription}
+            value={summary.projectDescription.replace(/\[Analyzed via .*? Intelligence\]/g, '').replace(/(\n• .*?)(?=\n• )/g, '$1\n').trim()}
             onSave={val => updateHistoryItem(p => ({
               ...p,
               analysisResult: { ...p.analysisResult, summary: { ...p.analysisResult.summary!, projectDescription: val } }

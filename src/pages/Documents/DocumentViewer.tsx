@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FileText, Download, Maximize2, Minimize2, ArrowLeft, Save, CloudOff, Eye, PenLine, ExternalLink } from 'lucide-react';
+import { FileText, Download, Maximize2, Minimize2, ArrowLeft, Save, CloudOff, Eye, PenLine, ExternalLink, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getDocument, updateDocumentMetadata } from '@/services/documentService';
 import { ClarityDocument } from '@/types/schema';
@@ -77,7 +76,6 @@ export default function DocumentViewer() {
     const docRef = firestoreDoc(db, 'documents', id);
     const unsubscribe = onSnapshot(docRef, async (snap: any) => {
       if (snap.exists()) {
-        const data = { id: snap.id, ...snap.data() } as ClarityDocument;
 
         // Use `getDocument` logic (via a temporary helper or direct logic) to refresh signed URL.
         // Since `getDocument` does `getDoc` internally, we can't reuse it cleanly inside onSnapshot without extra calls.

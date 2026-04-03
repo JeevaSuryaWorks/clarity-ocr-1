@@ -76,7 +76,14 @@ const FEATURES_DATA = [
 const TESTIMONIALS = [
     { name: "Sarah Jenkins", role: "Product Manager", content: "Clarity OCR saved my team 15+ hours a week. It's not just OCR; it's a productivity superpower.", rating: 5, bg: "bg-pink-100 dark:bg-pink-900/20" },
     { name: "Ashwin Kumar", role: "Data Scientist", content: "The API is incredibly robust. We integrated it into our pipeline in less than an hour.", rating: 5, bg: "bg-cyan-100 dark:bg-cyan-900/20" },
-    { name: "David Ross", role: "Legal Consultant", content: "Finding clauses in scanned contracts used to take days. Now it takes seconds.", rating: 5, bg: "bg-violet-100 dark:bg-violet-900/20" }
+    { name: "David Ross", role: "Legal Consultant", content: "Finding clauses in scanned contracts used to take days. Now it takes seconds.", rating: 5, bg: "bg-violet-100 dark:bg-violet-900/20" },
+    { name: "Elena Rodriguez", role: "Head of Operations", content: "We process over 10,000 invoices monthly. Clarity reduced our manual entry errors to zero and automated the entire workflow.", rating: 5, bg: "bg-emerald-100 dark:bg-emerald-900/20" },
+    { name: "Marcus Chen", role: "Financial Auditor", content: "The ability to accurately extract tables from degraded PDFs is unmatched. It easily handles our most complex financial statements.", rating: 5, bg: "bg-amber-100 dark:bg-amber-900/20" },
+    { name: "Priya Patel", role: "Software Engineer", content: "Their JSON structuring feature is magic. It doesn't just read the document; it understands the context and fields perfectly.", rating: 5, bg: "bg-sky-100 dark:bg-sky-900/20" },
+    { name: "Michael Chang", role: "Logistics Coordinator", content: "Scanning shipping manifests used to be a nightmare of typos. Now, we just upload images and the data is piped straight into our ERP.", rating: 5, bg: "bg-orange-100 dark:bg-orange-900/20" },
+    { name: "Jessica Lee", role: "HR Director", content: "Onboarding employees across different regions means dealing with dozens of ID formats. This tool recognizes them all seamlessly.", rating: 5, bg: "bg-teal-100 dark:bg-teal-900/20" },
+    { name: "Omar Farooq", role: "Research Analyst", content: "I feed it 200-page historical archives, and it spits out perfectly searchable text within minutes. Truly state-of-the-art.", rating: 5, bg: "bg-indigo-100 dark:bg-indigo-900/20" },
+    { name: "Hannah Klein", role: "Compliance Officer", content: "Security was our main concern. Knowing that data is processed in memory and immediately wiped made Clarity OCR the only viable choice for us.", rating: 5, bg: "bg-fuchsia-100 dark:bg-fuchsia-900/20" }
 ];
 
 const REAL_COMPANIES = [
@@ -447,33 +454,46 @@ export default function Landing() {
                     <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-slate-200 dark:via-slate-800 to-transparent" />
                     <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-slate-200 dark:via-slate-800 to-transparent" />
 
-                    <div className="container mx-auto px-4">
-                        <div className="text-center mb-16">
-                            <h2 className="text-3xl md:text-5xl font-bold text-center mb-6 font-sora">Loved by Professionals</h2>
+                    <div className="container mx-auto px-4 mb-16">
+                        <div className="text-center">
+                            <h2 className="text-3xl md:text-5xl font-bold mb-6 font-sora">Loved by Professionals</h2>
                             <p className="text-slate-500 text-lg">Don't just take our word for it.</p>
                         </div>
+                    </div>
 
-                        <div className="grid md:grid-cols-3 gap-8">
+                    <div className="relative flex w-full flex-col overflow-hidden py-4">
+                        <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-slate-50/50 dark:from-[#0B1121]/50 to-transparent z-10 pointer-events-none" />
+                        <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-slate-50/50 dark:from-[#0B1121]/50 to-transparent z-10 pointer-events-none" />
+
+                        <Marquee reverse pauseOnHover className="[--duration:60s] [--gap:2rem]">
                             {TESTIMONIALS.map((t, i) => (
-                                <Card key={i} className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none hover:-translate-y-2 transition-transform duration-300 rounded-3xl">
-                                    <CardContent className="pt-10 px-10 pb-10">
+                                <Card key={i} className="w-[380px] md:w-[450px] shrink-0 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none hover:-translate-y-2 transition-transform duration-300 rounded-3xl cursor-grab active:cursor-grabbing relative overflow-hidden group/card">
+                                    {/* Company Logo Background Watermark */}
+                                    <div className="absolute -right-6 -bottom-6 opacity-[0.03] dark:opacity-[0.02] transform group-hover/card:scale-110 group-hover/card:rotate-6 transition-transform duration-700 pointer-events-none">
+                                        <ScanLine className="w-64 h-64 text-sky-900 dark:text-sky-100" />
+                                    </div>
+
+                                    <CardContent className="pt-10 px-10 pb-10 h-full flex flex-col justify-between relative z-10">
                                         <div className="flex gap-1 mb-8">
                                             {[...Array(5)].map((_, i) => <Star key={i} className="w-5 h-5 fill-amber-400 text-amber-400" />)}
                                         </div>
-                                        <p className="text-xl text-slate-700 dark:text-slate-300 mb-8 leading-relaxed font-medium">"{t.content}"</p>
+                                        <p className="text-xl text-slate-700 dark:text-slate-300 mb-8 leading-relaxed font-medium grow">"{t.content}"</p>
                                         <div className="flex items-center gap-4">
-                                            <div className={`w-14 h-14 rounded-full flex items-center justify-center font-bold text-xl ${t.bg} text-slate-900 dark:text-white`}>
+                                            <div className={`w-14 h-14 rounded-full flex items-center justify-center font-bold text-xl ${t.bg} text-slate-900 dark:text-white shrink-0 shadow-inner`}>
                                                 {t.name[0]}
                                             </div>
                                             <div>
-                                                <div className="font-bold text-lg text-slate-900 dark:text-white">{t.name}</div>
-                                                <div className="text-slate-500">{t.role}</div>
+                                                <div className="font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2">
+                                                    {t.name}
+                                                    <span className="text-lg" title="India">🇮🇳</span>
+                                                </div>
+                                                <div className="text-slate-500 text-sm">{t.role}</div>
                                             </div>
                                         </div>
                                     </CardContent>
                                 </Card>
                             ))}
-                        </div>
+                        </Marquee>
                     </div>
                 </section>
 
@@ -634,13 +654,13 @@ export default function Landing() {
                             </p>
                             <div className="flex gap-4 pt-2">
                                 {/* Socials */}
-                                <a href="#" className="w-10 h-10 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-slate-400 hover:scale-110 hover:bg-[#1DA1F2]/10 hover:border-[#1DA1F2]/50 hover:text-[#1DA1F2] transition-all duration-300">
+                                <a href="https://x.com/Jeevasurya_data" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-slate-400 hover:scale-110 hover:bg-[#1DA1F2]/10 hover:border-[#1DA1F2]/50 hover:text-[#1DA1F2] transition-all duration-300">
                                     <Twitter className="w-4 h-4 fill-current" />
                                 </a>
-                                <a href="#" className="w-10 h-10 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-slate-400 hover:scale-110 hover:bg-white/10 hover:border-white/50 hover:text-white transition-all duration-300">
+                                <a href="https://github.com/JeevaSuryaWorks" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-slate-400 hover:scale-110 hover:bg-white/10 hover:border-white/50 hover:text-white transition-all duration-300">
                                     <Github className="w-4 h-4 fill-current" />
                                 </a>
-                                <a href="#" className="w-10 h-10 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-slate-400 hover:scale-110 hover:bg-[#0A66C2]/10 hover:border-[#0A66C2]/50 hover:text-[#0A66C2] transition-all duration-300">
+                                <a href="https://www.linkedin.com/in/jeevasuryapalanisamy/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-slate-400 hover:scale-110 hover:bg-[#0A66C2]/10 hover:border-[#0A66C2]/50 hover:text-[#0A66C2] transition-all duration-300">
                                     <Linkedin className="w-4 h-4 fill-current" />
                                 </a>
                             </div>
@@ -685,7 +705,7 @@ export default function Landing() {
                         <div>© {new Date().getFullYear()} Clarity OCR Inc. All rights reserved.</div>
                         <div className="flex gap-8">
                             <span>Status: <span className="text-emerald-500">Operational</span></span>
-                            <span>v2.5.0-beta</span>
+                            <span>V1.1.0 - Production</span>
                         </div>
                     </div>
                 </div>

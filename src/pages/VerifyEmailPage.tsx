@@ -5,10 +5,11 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Mail, LogOut, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { sendEmailVerification, reload } from 'firebase/auth';
+import { auth } from '@/firebase';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function VerifyEmailPage() {
-  const { user, logout } = useAuth();
+  const { user, logout, refreshUser } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
@@ -18,12 +19,12 @@ export default function VerifyEmailPage() {
   useEffect(() => {
     // Poll for verification status
     const interval = setInterval(async () => {
-      if (user && !user.emailVerified) {
+      if (auth.currentUser && !auth.currentUser.emailVerified) {
         try {
-          await reload(user);
-          if (user.emailVerified) {
+          await reload(auth.currentUser);
+          if (auth.currentUser.emailVerified) {
             clearInterval(interval);
-            // Let the AuthContext/useEffect redirect naturally or force it
+            await refreshUser();
             navigate('/dashboard');
           }
         } catch (e) {
@@ -36,11 +37,11 @@ export default function VerifyEmailPage() {
   }, [user, navigate]);
 
   const handleResendEmail = async () => {
-    if (!user) return;
+    if (!auth.currentUser) return;
     setLoading(true);
     setError(null);
     try {
-      await sendEmailVerification(user);
+      await sendEmailVerification(auth.currentUser);
       setEmailSent(true);
       // Reset success message after 5 seconds
       setTimeout(() => setEmailSent(false), 5000);
@@ -56,11 +57,12 @@ export default function VerifyEmailPage() {
   };
 
   const handleManualCheck = async () => {
-    if (!user) return;
+    if (!auth.currentUser) return;
     setVerifying(true);
     try {
-      await reload(user);
-      if (user.emailVerified) {
+      await reload(auth.currentUser);
+      if (auth.currentUser.emailVerified) {
+        await refreshUser();
         navigate('/dashboard');
       } else {
         setError("Email not verified yet.");

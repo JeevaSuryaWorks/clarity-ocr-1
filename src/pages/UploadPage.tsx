@@ -75,7 +75,7 @@ export default function UploadPage() {
 
     setIsAnalyzing(true);
     setProgress(0);
-    const progressInterval = setInterval(() => setProgress(p => Math.min(p + 10, 90)), 200);
+    const progressInterval = setInterval(() => setProgress((p: number) => Math.min(p + 10, 90)), 200);
 
     try {
       const result: AnalysisResult = await analyzeDocument(content);
@@ -147,7 +147,7 @@ export default function UploadPage() {
               onFileProcessed={handleAnalyze}
               isAnalyzing={isAnalyzing}
               progress={progress}
-              onRequestPassword={(file, resolve, reject) => {
+              onRequestPassword={(file: File, resolve: (password: string) => void, reject: () => void) => {
                 setPendingFile({ file, resolve, reject });
                 setPasswordDialogOpen(true);
               }}

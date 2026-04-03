@@ -1,10 +1,12 @@
 // src/types/task.ts
 
+export type Priority = 'critical' | 'high' | 'medium' | 'low' | 'none';
+
 export interface TaskItem {
   id: string;
   content: string;
   completed: boolean;
-  priority: 'critical' | 'high' | 'medium' | 'low' | 'none';
+  priority: Priority;
   estimatedTime: number | null;
   deadline: string | null; // ISO 8601 string format
   createdAt: string;      // ISO 8601 string format

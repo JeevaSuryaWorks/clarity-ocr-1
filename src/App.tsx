@@ -72,6 +72,7 @@ const GuestRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 };
 
 const App: React.FC = () => {
+  console.log("[App] Component rendering...");
   return (
     <AuthProvider>
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
@@ -100,7 +101,6 @@ const App: React.FC = () => {
             <Route path="/billing" element={<BillingPage />} />
             <Route path="/tasks" element={<TasksPage />} />
             <Route path="/tasks/new" element={<TasksPage />} />
-            <Route path="/integrations" element={<IntegrationsPage />} />
             <Route path="/integrations" element={<IntegrationsPage />} />
           </Route>
 

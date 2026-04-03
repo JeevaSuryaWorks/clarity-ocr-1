@@ -180,7 +180,7 @@ const GuidePage: React.FC = () => {
                         className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-sky-500/20 bg-sky-500/10 text-sky-400 text-sm font-medium"
                     >
                         <Sparkles className="w-3.5 h-3.5" />
-                        <span>Final Year Project 2025</span>
+                        <span>Final Year Project 2026</span>
                     </motion.div>
 
                     <motion.h1

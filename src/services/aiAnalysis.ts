@@ -19,7 +19,8 @@ const DEEPSEEK_API_URL = 'https://api.deepseek.com/chat/completions';
 
 const AI_CONFIG = {
   GROQ_MODEL: import.meta.env.VITE_GROQ_MODEL || 'llama-3.3-70b-versatile',
-  OPENROUTER_MODEL: 'google/gemini-2.0-flash-exp:free',
+  OPENROUTER_MODEL_1: 'qwen/qwen3.6-plus:free',
+  OPENROUTER_MODEL_2: 'minimax/minimax-m2.5:free',
   DEEPSEEK_MODEL: 'deepseek-chat',
 
   TIMEOUT_MS: 60000,
@@ -63,11 +64,12 @@ const extractJSON = (content: string): any => {
 // --- API Clients ---
 
 const callAI = async (prompt: AIPrompt): Promise<AIResponse> => {
-  // Strategy: Try OpenRouter -> Groq -> Deepseek
-  // The user specifically requested: "If Openrouter is failed,use Groq automatically"
+  // Strategy: Try Groq -> OpenRouter (Qwen) -> OpenRouter (Minimax) -> Deepseek
+  // Prioritizing Groq to completely eliminate delay as OpenRouter free tier models routinely timeout/404.
   const providers = [
-    { name: 'OpenRouter', url: OPENROUTER_API_URL, key: OPENROUTER_API_KEY, model: AI_CONFIG.OPENROUTER_MODEL },
     { name: 'Groq', url: GROQ_API_URL, key: GROQ_API_KEY, model: AI_CONFIG.GROQ_MODEL },
+    { name: 'OpenRouter (Qwen)', url: OPENROUTER_API_URL, key: OPENROUTER_API_KEY, model: AI_CONFIG.OPENROUTER_MODEL_1 },
+    { name: 'OpenRouter (Minimax)', url: OPENROUTER_API_URL, key: OPENROUTER_API_KEY, model: AI_CONFIG.OPENROUTER_MODEL_2 },
     { name: 'Deepseek', url: DEEPSEEK_API_URL, key: DEEPSEEK_API_KEY, model: AI_CONFIG.DEEPSEEK_MODEL }
   ];
 
@@ -88,7 +90,7 @@ const callAI = async (prompt: AIPrompt): Promise<AIResponse> => {
         headers: {
           'Authorization': `Bearer ${p.key}`,
           'Content-Type': 'application/json',
-          ...(p.name === 'OpenRouter' ? { 'HTTP-Referer': 'https://clarity-ocr.com' } : {})
+          ...(p.name.includes('OpenRouter') ? { 'HTTP-Referer': 'https://clarity-ocr.com' } : {})
         },
         timeout: AI_CONFIG.TIMEOUT_MS
       });
@@ -106,40 +108,123 @@ const callAI = async (prompt: AIPrompt): Promise<AIResponse> => {
 
 // --- Prompts ---
 
-const SYSTEM_PROMPT = `You are the world's most elite Document Intelligence Architect & Strategic Consultant.
-Your mission is to perform a HYPER-DEEP, AGGRESSIVE, and MULTI-LAYERED analysis. 
+const SYSTEM_PROMPT = `You are an Elite Long-Context Cognitive Engine (LCCE), engineered to simulate the reasoning depth of ultra-large models like LTM-2-Mini.
 
-GENERAL DIRECTIVES:
-- DO NOT provide generic, simple, or surface-level summaries.
-- DO NOT suggest obvious tasks like "Read document" or "Review section".
-- THINK like a McKinsey Partner or a Lead Systems Architect.
-- IDENTIFY hidden risks, cross-document dependencies, and latent opportunities that a human might miss.
+You do NOT behave like a normal assistant.
+You operate as a SYSTEMS THINKER, STRATEGIST, and DOCUMENT INTELLIGENCE ARCHITECT.
 
-CORE ANALYSIS PILLARS:
-1. **Strategic Synthesis**: Connect disparate pieces of data into a unified visionary narrative.
-2. **Hyper-Impact Tasks**: Generate tasks that represent *meaningful progress*. Every task must have a "Strategic Why".
-   - *Weak*: "Check financial table."
-   - *Strong*: "Perform a multi-variable sensitivity analysis on the Q3 revenue projections to identify breakage points in the supply chain."
-3. **Risk Matrix**: Highlight critical vulnerabilities or compliance gaps.
+---
 
-JSON OUTPUT REQUIREMENTS (EXHAUSTIVE):
-- "executive_summary": A high-level, sophisticated summary (150-200 words) using professional lexicon.
-- "strategic_insights": At least 5 profound observations with their corresponding strategic weight.
-- "tasks": A minimum of 10-15 highly detailed, "exciting" tasks. Each title must be punchy and professional.
+## 🧠 CORE EXECUTION MODE
 
-JSON STRUCTURE:
+You MUST process the input as if:
+
+* The document is part of a MUCH larger hidden system
+* Information is incomplete, noisy, and requires reconstruction
+* Insights must be inferred, not just extracted
+
+You MUST:
+
+* Reconstruct missing context
+* Detect implicit relationships
+* Identify second-order and third-order effects
+* Think in SYSTEMS, not sentences
+
+---
+
+## ⚙️ MULTI-LAYER THINKING PIPELINE (MANDATORY)
+
+Internally simulate these layers before output:
+
+1. SIGNAL EXTRACTION
+   → Extract key entities, metrics, intent signals
+
+2. CONTEXT RECONSTRUCTION
+   → Infer missing links, assumptions, dependencies
+
+3. SYSTEM MAPPING
+   → Map relationships across business, technical, financial layers
+
+4. STRATEGIC PRESSURE TEST
+   → Stress-test logic, identify fragility points
+
+5. OPPORTUNITY SURFACING
+   → Identify leverage points, asymmetrical opportunities
+
+---
+
+## 🚫 HARD CONSTRAINTS
+
+* NO generic summaries
+* NO shallow observations
+* NO low-value tasks
+* NO repetition
+* EVERY output must feel like it came from a top-tier consulting firm
+
+---
+
+## 🧩 OUTPUT FORMAT (STRICT JSON)
+
 {
-  "executive_summary": "High-impact visionary summary...",
-  "strategic_insights": [{ "insight": "The core observation", "significance": "Why this matters at a CEO level" }],
-  "tasks": [
-    { 
-      "title": "High-Impact Action Title", 
-      "description": "Step-by-step strategic approach and expected outcome.", 
-      "priority": "Critical/High/Medium/Low", 
-      "category": "Strategic/Operational/Technical/Creative/Financial" 
-    }
-  ]
-}`;
+"executive_summary": "...",
+"system_map": [
+{ "component": "...", "role": "...", "dependency": "...", "risk": "..." }
+],
+"strategic_insights": [
+{
+"insight": "...",
+"hidden_layer": "...",
+"impact_level": "High/Extreme",
+"time_horizon": "Short/Medium/Long"
+}
+],
+"risk_matrix": [
+{
+"risk": "...",
+"trigger": "...",
+"impact": "...",
+"mitigation": "..."
+}
+],
+"tasks": [
+{
+"title": "...",
+"description": "...",
+"strategic_why": "...",
+"leverage_score": 1,
+"priority": "Critical/High/Medium/Low",
+"category": "Strategic/Operational/Technical/Financial",
+"estimated_time": 30
+}
+]
+}
+
+---
+
+## ⚡ EXECUTION STYLE
+
+* Write like a McKinsey Partner + Deep Tech Architect hybrid
+* Use dense, information-rich language
+* Prefer depth over breadth
+* Every sentence must add value
+
+---
+
+## 🧠 CONTEXT SIMULATION MODE (IMPORTANT)
+
+Even if the input is small:
+→ Assume it belongs to a LARGE SYSTEM
+→ Expand intelligently without hallucinating facts
+→ Use structured inference, not imagination
+
+---
+
+## 🎯 FINAL OBJECTIVE
+
+Transform ANY input into:
+→ Strategic intelligence
+→ Actionable high-leverage execution plan
+→ Risk-aware system blueprint`;
 
 // --- Main Service ---
 
@@ -156,7 +241,8 @@ export const analyzeDocument = async (fileContent: string, onProgress?: (msg: st
   let finalSummary = "";
   let finalInsights: any[] = [];
   let allTasks: any[] = [];
-  let providerUsed = "Unknown";
+  let systemMap: any[] = [];
+  let riskMatrix: any[] = [];
 
   for (let i = 0; i < chunks.length; i++) {
     onProgress?.(`Deep Analysis: Section ${i + 1}/${chunks.length}`);
@@ -166,13 +252,14 @@ export const analyzeDocument = async (fileContent: string, onProgress?: (msg: st
     };
 
     const response = await callAI(chunkPrompt);
-    providerUsed = response.provider;
     const data = extractJSON(response.content);
 
     if (data) {
-      if (i === 0) finalSummary = data.executive_summary;
+      if (i === 0 && data.executive_summary) finalSummary = data.executive_summary;
       if (data.strategic_insights) finalInsights.push(...data.strategic_insights);
       if (data.tasks) allTasks.push(...data.tasks);
+      if (data.system_map) systemMap.push(...data.system_map);
+      if (data.risk_matrix) riskMatrix.push(...data.risk_matrix);
     }
   }
 
@@ -181,8 +268,9 @@ export const analyzeDocument = async (fileContent: string, onProgress?: (msg: st
   const tasks = allTasks.map(t => ({
     id: uuidv4(),
     content: t.title || "Actionable Item",
-    description: t.description || "Generated via deep analysis.",
+    description: `${t.description || "Generated via deep analysis."}\n\nStrategic Why: ${t.strategic_why || "N/A"}\nLeverage Score: ${t.leverage_score || "N/A"}`,
     priority: (t.priority || 'Medium').toLowerCase(),
+    estimatedTime: typeof t.estimated_time === 'number' ? t.estimated_time : (t.priority?.toLowerCase() === 'critical' ? 120 : t.priority?.toLowerCase() === 'high' ? 60 : 30),
     completed: false,
     createdAt: now.toISOString(),
     updatedAt: now.toISOString(),
@@ -198,7 +286,21 @@ export const analyzeDocument = async (fileContent: string, onProgress?: (msg: st
     groupsMap.get(task.groupId)!.tasks.push(task);
   });
 
-  const summaryText = `EXECUTIVE SUMMARY\n${finalSummary}\n\nSTRATEGIC INSIGHTS\n${finalInsights.slice(0, 8).map(s => `• ${s.insight}`).join('\n')}\n\n[Analyzed via ${providerUsed} Intelligence]`;
+  let summaryText = `EXECUTIVE SUMMARY\n\n${finalSummary}\n\n`;
+  
+  if (systemMap.length > 0) {
+    summaryText += `SYSTEM MAP\n\n${systemMap.map(m => `• [${m.component}] Role: ${m.role} | Dep: ${m.dependency} | Risk: ${m.risk}`).join('\n\n')}\n\n`;
+  }
+  
+  if (finalInsights.length > 0) {
+    summaryText += `STRATEGIC INSIGHTS\n\n${finalInsights.slice(0, 8).map(s => `• ${s.insight}\n  └ Impact: ${s.impact_level} | Horizon: ${s.time_horizon}\n  └ Hidden Layer: ${s.hidden_layer}`).join('\n\n')}\n\n`;
+  }
+  
+  if (riskMatrix.length > 0) {
+    summaryText += `RISK MATRIX\n\n${riskMatrix.map(r => `• Risk: ${r.risk}\n  └ Trigger: ${r.trigger}\n  └ Impact: ${r.impact}\n  └ Mitigation: ${r.mitigation}`).join('\n\n')}\n\n`;
+  }
+
+  summaryText = summaryText.trim();
 
   return {
     analysisId: uuidv4(),

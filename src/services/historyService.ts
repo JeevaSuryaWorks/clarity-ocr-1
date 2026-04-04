@@ -89,7 +89,7 @@ export const updateHistoryItem = async (
   }
 };
 
-import { getAuthenticatedSupabase } from '@/services/supabase';
+import { createClient } from '@/utils/supabase/client';
 
 /**
  * Deletes a history item AND cleans up associated Storage files and Document records
@@ -118,7 +118,7 @@ export const deleteHistoryItem = async (
               // Heuristic: If it looks like a Supabase path or we have explicit metadata
               // Ideally, we store "storageProvider" in the document record now.
               // For now, we attempt deletion if we have a path.
-              const sb = await getAuthenticatedSupabase();
+              const sb = createClient();
               // Assuming 'raw_uploads' for documents based on migration plan
               // We might need to check multiple buckets if not tracked.
               // Best effort cleanup:

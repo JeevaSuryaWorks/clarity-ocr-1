@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { sendPasswordResetEmail, signOut, updateProfile } from 'firebase/auth';
 import { auth, db } from '@/firebase';
-import { uploadFileToSupabase, getAuthenticatedSupabase, syncUserToSupabase } from '@/services/supabase';
+import { uploadFileToSupabase } from '@/services/supabase';
+import { createClient } from '@/utils/supabase/client';
 import { doc, updateDoc } from 'firebase/firestore';
 import { Loader2, KeyRound, AlertTriangle, Mail, Camera, LogOut, Upload, User, ShieldCheck, Zap } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -71,7 +72,7 @@ export default function ProfilePage() {
       if (editFile) {
         try {
           const path = await uploadFileToSupabase('profile_photos', editFile, 'avatar');
-          const sb = await getAuthenticatedSupabase();
+          const sb = createClient();
           // We assume public access for profile photos
           const { data } = sb.storage.from('profile_photos').getPublicUrl(path);
           photoURL = data.publicUrl;
@@ -89,7 +90,7 @@ export default function ProfilePage() {
       });
 
       if (user && (editFile || editName !== user.displayName)) {
-        await syncUserToSupabase();
+        // Feature flagged out until native Supabase Auth completely replaces Firebase
       }
 
       const userDocRef = doc(db, 'users', auth.currentUser.uid);

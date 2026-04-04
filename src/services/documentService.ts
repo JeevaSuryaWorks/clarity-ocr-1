@@ -13,7 +13,8 @@ import {
   Timestamp
 } from "firebase/firestore";
 import { db, auth } from "@/firebase";
-import { uploadFileToSupabase, getSignedUrl, getAuthenticatedSupabase } from "@/services/supabase";
+import { uploadFileToSupabase, getSignedUrl } from "@/services/supabase";
+import { createClient } from "@/utils/supabase/client";
 import { ClarityDocument, OCRResult } from "@/types/schema";
 import { runOCR } from "@/lib/ocrEngine";
 
@@ -221,7 +222,7 @@ export const deleteDocument = async (document: ClarityDocument): Promise<void> =
 
     if (path) {
       try {
-        const sb = await getAuthenticatedSupabase();
+        const sb = createClient();
         await sb.storage.from('raw_uploads').remove([path]);
         await sb.storage.from('processed_docs').remove([path]);
       } catch (e) {

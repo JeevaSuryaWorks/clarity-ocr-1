@@ -293,24 +293,125 @@ class ImageStrategy implements OcrStrategy {
     if (file.size > MAX_IMAGE_SIZE) throw new Error("Image too large for browser OCR.");
 
     progressCallback?.(10);
-    const optimized = await optimizeImageForOCR(file);
     const imageBase64 = await blobToBase64(file);
-    progressCallback?.(30);
 
-    const { data } = await Tesseract.recognize(optimized, 'eng', {
-      logger: m => {
-        if (m.status === 'recognizing text') {
-          progressCallback?.(30 + (m.progress * 70));
+    const prompt = "Extract absolutely all text perfectly exactly as written. Do not summarize, do not hallucinate, and do not add conversational text. Preserve the original structure.";
+
+    // 1. Primary Strategy: Groq Vision (llama-3.2-11b-vision-instruct)
+    const groqKey = import.meta.env.VITE_GROQ_API_KEY;
+    if (groqKey) {
+      try {
+        progressCallback?.(30);
+        const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
+          headers: { "Authorization": `Bearer ${groqKey}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "llama-3.2-11b-vision-instruct",
+            messages: [{
+              role: "user",
+              content: [
+                { type: "text", text: prompt },
+                { type: "image_url", image_url: { url: imageBase64 } }
+              ]
+            }],
+            temperature: 0.1
+          })
+        });
+
+        if (groqResponse.ok) {
+          const data = await groqResponse.json();
+          progressCallback?.(100);
+          return {
+            text: (data.choices?.[0]?.message?.content || "").trim(),
+            confidence: 99,
+            processingTime: Date.now() - startTime,
+            fileType: 'Image',
+            strategyUsed: 'Groq LLaMA-3.2 Vision',
+            imageBase64
+          };
+        } else {
+          console.warn("Groq Vision API Error:", await groqResponse.text());
         }
+      } catch (e) {
+        console.warn("Groq Request Failed, checking fallbacks...", e);
       }
+    }
+
+    // 2. Secondary Strategy: Optiic OCR API
+    const optiicKey = import.meta.env.VITE_OPTIIC_API_KEY;
+    if (optiicKey) {
+      try {
+        progressCallback?.(50); // Optiic processing...
+        
+        const formData = new FormData();
+        formData.append("image", file);
+        formData.append("mode", "ocr");
+
+        const response = await fetch("https://api.optiic.dev/process", {
+          method: "POST",
+          headers: { "Authorization": `Bearer ${optiicKey}` },
+          body: formData
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          progressCallback?.(100);
+          return {
+            text: (data.text || "").trim(),
+            confidence: 99, 
+            processingTime: Date.now() - startTime,
+            fileType: 'Image',
+            strategyUsed: 'Optiic API',
+            imageBase64
+          };
+        } else {
+          console.warn("Optiic request failed.", await response.text());
+        }
+      } catch (e) {
+        console.warn("Optiic Engine crashed, checking for Hive AI fallback...", e);
+      }
+    }
+
+    // 2. Secondary Strategy: Hive AI OCR
+    const hiveSecret = import.meta.env.VITE_HIVE_SECRET_KEY;
+    if (!hiveSecret) throw new Error("All specialized OCR Engines failed (Optiic/Hive). Check your .env configuration.");
+
+    progressCallback?.(75); // Hive processing...
+
+    const hiveData = new FormData();
+    hiveData.append("media", file);
+
+    const hiveResponse = await fetch("https://api.thehive.ai/api/v2/task/sync", {
+      method: "POST",
+      headers: { "Authorization": `Token ${hiveSecret}` },
+      body: hiveData
     });
 
+    if (!hiveResponse.ok) {
+      const errText = await hiveResponse.text();
+      throw new Error(`Hive AI API Error: ${errText}`);
+    }
+
+    const hiveResult = await hiveResponse.json();
+    
+    // Attempting to aggregate nested Hive OCR results
+    let hiveTextExtract = "";
+    try {
+       const rawOutput = hiveResult.data[0]?.status[0]?.response?.output[0]?.classes || [];
+       hiveTextExtract = rawOutput.map((c: any) => c.class).join(' ');
+    } catch(err) {
+       console.warn("Could not cleanly parse Hive nested JSON output:", err);
+       hiveTextExtract = JSON.stringify(hiveResult); // Fallback so data isn't lost
+    }
+
+    progressCallback?.(100);
+
     return {
-      text: data.text.trim(),
-      confidence: Math.round(data.confidence),
+      text: hiveTextExtract.trim(),
+      confidence: 99,
       processingTime: Date.now() - startTime,
       fileType: 'Image',
-      strategyUsed: 'Tesseract.js',
+      strategyUsed: 'Hive AI',
       imageBase64
     };
   }

@@ -306,7 +306,7 @@ class ImageStrategy implements OcrStrategy {
           method: "POST",
           headers: { "Authorization": `Bearer ${groqKey}`, "Content-Type": "application/json" },
           body: JSON.stringify({
-            model: "llama-3.2-11b-vision-instruct",
+            model: "llama-3.2-11b-vision-preview",
             messages: [{
               role: "user",
               content: [
@@ -326,7 +326,7 @@ class ImageStrategy implements OcrStrategy {
             confidence: 99,
             processingTime: Date.now() - startTime,
             fileType: 'Image',
-            strategyUsed: 'Groq LLaMA-3.2 Vision',
+            strategyUsed: 'Groq LLaMA-3.2 Vision (Preview)',
             imageBase64
           };
         } else {
@@ -372,48 +372,31 @@ class ImageStrategy implements OcrStrategy {
       }
     }
 
-    // 2. Secondary Strategy: Hive AI OCR
-    const hiveSecret = import.meta.env.VITE_HIVE_SECRET_KEY;
-    if (!hiveSecret) throw new Error("All specialized OCR Engines failed (Optiic/Hive). Check your .env configuration.");
+    // 3. Final Fallback: Local Tesseract.js
+    console.warn("All cloud OCR strategies failed or hit limits. Falling back to local Tesseract.js...");
+    progressCallback?.(80); 
 
-    progressCallback?.(75); // Hive processing...
-
-    const hiveData = new FormData();
-    hiveData.append("media", file);
-
-    const hiveResponse = await fetch("https://api.thehive.ai/api/v2/task/sync", {
-      method: "POST",
-      headers: { "Authorization": `Token ${hiveSecret}` },
-      body: hiveData
-    });
-
-    if (!hiveResponse.ok) {
-      const errText = await hiveResponse.text();
-      throw new Error(`Hive AI API Error: ${errText}`);
-    }
-
-    const hiveResult = await hiveResponse.json();
-    
-    // Attempting to aggregate nested Hive OCR results
-    let hiveTextExtract = "";
+    let worker: Tesseract.Worker | null = null;
     try {
-       const rawOutput = hiveResult.data[0]?.status[0]?.response?.output[0]?.classes || [];
-       hiveTextExtract = rawOutput.map((c: any) => c.class).join(' ');
-    } catch(err) {
-       console.warn("Could not cleanly parse Hive nested JSON output:", err);
-       hiveTextExtract = JSON.stringify(hiveResult); // Fallback so data isn't lost
+      worker = await Tesseract.createWorker("eng");
+      const optimized = await optimizeImageForOCR(file);
+      const { data } = await worker.recognize(optimized);
+      
+      progressCallback?.(100);
+      return {
+        text: data.text.trim(),
+        confidence: data.confidence,
+        processingTime: Date.now() - startTime,
+        fileType: 'Image',
+        strategyUsed: 'Tesseract.js (Local Fallback)',
+        imageBase64
+      };
+    } catch (tessError: any) {
+      console.error("Local Tesseract fallback also failed:", tessError);
+      throw new Error(`All OCR strategies failed. Last error: ${tessError.message}`);
+    } finally {
+      if (worker) await worker.terminate();
     }
-
-    progressCallback?.(100);
-
-    return {
-      text: hiveTextExtract.trim(),
-      confidence: 99,
-      processingTime: Date.now() - startTime,
-      fileType: 'Image',
-      strategyUsed: 'Hive AI',
-      imageBase64
-    };
   }
 }
 

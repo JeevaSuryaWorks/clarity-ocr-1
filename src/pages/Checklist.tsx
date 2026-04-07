@@ -437,7 +437,27 @@ const ChecklistPage: React.FC = () => {
   };
 
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-violet-50"><Loader2 className="animate-spin text-violet-600" /></div>;
-  if (!historyItem) return <div className="p-8 text-center">Checklist not found</div>;
+  if (!historyItem) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-[#030712] p-4 text-center">
+        <div className="w-20 h-20 bg-violet-100 dark:bg-violet-900/30 rounded-3xl flex items-center justify-center mb-6">
+          <BookOpen className="w-10 h-10 text-violet-600 dark:text-violet-400" />
+        </div>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Checklist Not Found</h1>
+        <p className="text-slate-500 dark:text-slate-400 mb-8 max-w-sm">
+          The checklist you're looking for doesn't exist or you don't have permission to view it.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Button onClick={() => navigate('/dashboard')} variant="outline" className="rounded-xl px-8 h-12">
+            Back to Dashboard
+          </Button>
+          <Button onClick={() => navigate('/upload')} className="bg-violet-600 hover:bg-violet-700 text-white rounded-xl px-8 h-12 shadow-lg shadow-violet-500/20">
+            Create New Checklist
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#f8fafc] dark:bg-[#030712] font-sans text-slate-900 dark:text-slate-100 relative overflow-x-hidden selection:bg-violet-200 selection:text-violet-900">

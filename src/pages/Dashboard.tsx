@@ -19,6 +19,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
+import { addToHistory } from '@/services/historyService';
+import { v4 as uuidv4 } from 'uuid';
+import { toast } from 'react-hot-toast';
 
 // Services & Types
 import {
@@ -165,6 +168,33 @@ export default function Dashboard() {
     };
   }, [user]);
 
+  const handleCreateManualChecklist = async () => {
+    try {
+      const emptyResult = {
+        analysisId: uuidv4(),
+        totalTasks: 0,
+        summary: {
+          projectDescription: "Manual checklist started from scratch.",
+          milestones: [],
+          resources: []
+        },
+        groups: [{
+          id: uuidv4(),
+          name: "My Tasks",
+          expanded: true,
+          tasks: []
+        }]
+      };
+
+      const newId = await addToHistory(emptyResult, "New Manual Checklist");
+      toast.success("Checklist created!");
+      navigate(`/checklist/${newId}`);
+    } catch (error) {
+      console.error("Failed to create checklist:", error);
+      toast.error("Failed to create checklist.");
+    }
+  };
+
   if (!user) return null;
 
   return (
@@ -244,7 +274,7 @@ export default function Dashboard() {
                   icon={CheckSquare}
                   label="Create Checklist"
                   desc="Start from scratch"
-                  onClick={() => navigate('/checklist/new')}
+                  onClick={handleCreateManualChecklist}
                 />
                 {/* Add more as needed */}
               </div>
